@@ -1,0 +1,20 @@
+name: omar.yt
+version: 0.1.0
+
+authors:
+  - Omar Roth <omarroth@hotmail.com>
+
+targets:
+  omar.yt:
+    main: src/omar.yt.cr
+
+dependencies:
+  syntax:
+    github: omarroth/syntax.cr
+    branch: master
+  kemal:
+    github: kemalcr/kemal
+
+crystal: 0.25.1
+
+license: MIT
