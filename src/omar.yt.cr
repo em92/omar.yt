@@ -30,11 +30,11 @@ END_BNF
 meta_grammar = <<-'END_BNF'
 :start ::= statements
 statements ::= statement+
-statement ::= <start rule>
-  | <priority rule>
-  | <quantified rule>
-  | <discard rule>
-  | <empty rule>
+statement ::= <start rule> color => red
+  | <priority rule> color => green
+  | <quantified rule> color => blue
+  | <discard rule> color => gray
+  | <empty rule> color => gray
 
 <start rule> ::= ':start' <op declare bnf> <single symbol>
 <priority rule> ::= lhs <op declare> priorities
@@ -44,11 +44,11 @@ statement ::= <start rule>
 
 priorities ::= alternatives+
     separator => '||' proper => 1
-alternatives ::= alternative+
+alternatives ::= alternative+    
     separator => '|' proper => 1
-alternative ::= rhs <adverb list>
+alternative ::= rhs <adverb list> bgcolor => snow
 
-<adverb list> ::= <adverb item>*
+<adverb list> ::= <adverb item>* color => cadetblue
 <adverb item> ::= <separator specification>
   | <proper specification>
   | <rank specification>
@@ -76,8 +76,8 @@ rhs ::= <rhs primary>+
 <rhs list> ::= <rhs primary>+
 
 <single symbol> ::= symbol
-  | <character class>
-  | <regex>
+  | <character class> color => turquoise
+  | <regex> color => turquoise
 symbol ::= <symbol name>
 <symbol name> ::= <bare name>
   | <bracketed name>
@@ -100,7 +100,7 @@ digit ~ [\d]+
 <bracketed name> ~ '<' <bracketed name string> '>'
 <bracketed name string> ~ [\s\w]+
 
-<single quoted string> ::= <quoted string>
+<single quoted string> ::= <quoted string> color => peru
 <quoted string> ~ /'[^'\x0A\x0B\x0C\x0D\x{0085}\x{2028}\x{2029}]+'/
 
 <regex> ~ /\/.*\/[imx]{0,3}/
@@ -143,13 +143,13 @@ post "/syntax/update" do |env|
   grammar = json["grammar"]
 
   input = input.as_s
-  input = input.gsub("<br>", "\n")
-  input = input.gsub("<br/>", "\n")
+  input = input.gsub("<div>", "\n")
+  input = input.gsub("</div>", "")
   input = XML.parse_html(input)
 
   grammar = grammar.as_s
-  grammar = grammar.gsub("<br>", "\n")
-  grammar = grammar.gsub("<br/>", "\n")
+  grammar = grammar.gsub("<div>", "\n")
+  grammar = grammar.gsub("</div>", "")
   grammar = XML.parse_html(grammar)
 
   marked = :grammar
@@ -160,10 +160,7 @@ post "/syntax/update" do |env|
   end
 
   input = input.content
-  input = HTML.unescape(input)
-
   grammar = grammar.content
-  grammar = HTML.unescape(grammar)
 
   begin
     input = highlighter.highlight(input, grammar.delete('\ufeff') + marker)
