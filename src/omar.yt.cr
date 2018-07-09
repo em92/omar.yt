@@ -33,8 +33,9 @@ statements ::= statement+
 statement ::= <start rule> color => red
   | <priority rule> color => green
   | <quantified rule> color => blue
-  | <discard rule> color => gray
-  | <empty rule> color => gray
+  | <discard rule> color => darkgray
+  | <empty rule> color => darkgray
+  | <comment> color => gray
 
 <start rule> ::= ':start' <op declare bnf> <single symbol>
 <priority rule> ::= lhs <op declare> priorities
@@ -44,7 +45,7 @@ statement ::= <start rule> color => red
 
 priorities ::= alternatives+
     separator => '||' proper => 1
-alternatives ::= alternative+    
+alternatives ::= alternative+
     separator => '|' proper => 1
 alternative ::= rhs <adverb list> bgcolor => snow
 
@@ -108,7 +109,7 @@ digit ~ [\d]+
 <cc elements> ~ [^\x5d\x0A\x0B\x0C\x0D\x{0085}\x{2028}\x{2029}]+
 
 # Allow comments
-:discard ~ <hash comment>
+<comment> ::= <hash comment>
 <hash comment> ~ /#[^\n]*/
 END_BNF
 
@@ -152,12 +153,8 @@ post "/syntax/update" do |env|
   grammar = grammar.gsub("</div>", "")
   grammar = XML.parse_html(grammar)
 
-  marked = :grammar
-  rangySelectionBoundaries = grammar.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
-  if rangySelectionBoundaries.empty?
-    marked = :input
-    rangySelectionBoundaries = input.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
-  end
+  grammarSelectionBoundaries = grammar.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
+  inputSelectionBoundaries = input.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
 
   input = input.content
   grammar = grammar.content
@@ -169,27 +166,20 @@ post "/syntax/update" do |env|
     next {"error" => ex.message}.to_json
   end
 
-  if marked == :input
-    i = 0
-    input = input.sub("\ufeff") do |replacement|
-      i += 1
-      rangySelectionBoundaries[i - 1]
-    end
-  else
-    i = 0
-    grammar = grammar.sub("\ufeff") do |replacement|
-      i += 1
-      rangySelectionBoundaries[i - 1]
-    end
+  i = 0
+  input = input.sub("\ufeff") do |replacement|
+    i += 1
+    inputSelectionBoundaries[i - 1]
+  end
+
+  i = 0
+  grammar = grammar.sub("\ufeff") do |replacement|
+    i += 1
+    grammarSelectionBoundaries[i - 1]
   end
 
   env.response.content_type = "application/json"
   {"input" => input, "grammar" => grammar}.to_json
-end
-
-error 404 do |env|
-  env.response.status_code = 301
-  next env.redirect "/"
 end
 
 Kemal.run
