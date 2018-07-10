@@ -151,6 +151,10 @@ if Kemal.config.ssl
   end
 end
 
+static_headers do |response, filepath, filestat|
+  response.headers.add("Cache-Control", "max-age=86400")
+end
+
 gzip true
 public_folder "assets"
 
