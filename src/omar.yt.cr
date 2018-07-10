@@ -155,4 +155,27 @@ get "/:path" do |env|
   end
 end
 
+# Add redirect if SSL is enabled
+if Kemal.config.ssl
+  spawn do
+    server = HTTP::Server.new do |context|
+      redirect_url = "https://#{context.request.host}#{context.request.path}"
+      if context.request.query
+        redirect_url += "?#{context.request.query}"
+      end
+      context.response.headers.add("Location", redirect_url)
+      context.response.status_code = 301
+    end
+
+    server.bind_tcp "0.0.0.0", 80
+    server.listen
+  end
+
+  before_all do |env|
+    env.response.headers.add("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload")
+  end
+end
+
+gzip true
+
 Kemal.run
