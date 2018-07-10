@@ -52,16 +52,34 @@
     rangy.removeMarkers(savedSel);
   }
   </script>
+  <style>
+  pre {
+    background: #f8f8f8;
+    overflow: auto;
+    tab-size: 4;
+    display: block;
+    padding: 0.5em;
+  }
+  </style>
 </head>
 
 </body>
   <div class="pure-g">
-    <div class="pure-u-1 pure-u-md-1-2">
+    <div class="pure-u-1 pure-u-md-1-24"></div>
+    <div class="pure-1 pure-u-md-22-24">
+      <div class="pure-g">
+        <div class="pure-u-1 pure-u-md-11-24">
       <pre oninput="update();" spellcheck="false" contenteditable="true" id="grammar"><%= grammar %></pre>
     </div>
-    <div class="pure-u-1 pure-u-md-1-2">
+        <div class="pure-u-1 pure-u-md-2-24"></div>
+        <div class="pure-u-1 pure-u-md-11-24">
       <pre oninput="update();" spellcheck="false" contenteditable="true" id="input"><%= input %></pre>
+          <div id="error"></div>
+        </div>
+      </div>
+      </div>
     </div>
+    <div class="pure-u-1 pure-u-md-1-24"></div>
   </div>
 <body>
 </html>
