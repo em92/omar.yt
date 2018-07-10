@@ -21,6 +21,22 @@ END_BNF
 default_input = "10 + (6 - 1 / 3) * 2"
 meta_grammar = highlighter.compile(meta_grammar + marker)
 
+writings = Dir.children("./src/omar.yt/writings/")
+posts = {} of String => String
+writings.each do |post|
+  name = post.rstrip(".md")
+  name = name.gsub(" ", "-")
+  name = name.downcase
+
+  content = File.read("./src/omar.yt/writings/#{post}")
+  content = String.build do |io|
+    renderer = CustomRenderer.new(io, meta_grammar)
+    Markdown.parse(content, renderer)
+  end
+
+  posts[name] = content
+end
+
 get "/" do |env|
   "Hello world"
 end
@@ -80,6 +96,17 @@ post "/syntax/update" do |env|
 
   env.response.content_type = "application/json"
   {"input" => input, "grammar" => grammar}.to_json
+end
+
+get "/:path" do |env|
+  path = env.params.url["path"]
+  path = path.downcase
+
+  if posts[path]?
+    posts[path]
+  else
+    env.redirect "/"
+  end
 end
 
 Kemal.run
