@@ -144,6 +144,8 @@ grammar = <<-'END_BNF'
 END_BNF
 
 input = "example input"
+
+highlighter = Syntax::Highlighter.new
 highlighter.highlight(input, grammar)
 ```
 
