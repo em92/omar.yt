@@ -4,8 +4,12 @@ require "syntax"
 require "xml"
 require "html"
 
+macro rendered(filename)
+  render "src/omar.yt/views/#{{{filename}}}"
+end
+
 macro templated(filename)
-  render "src/omar.yt/#{{{filename}}}"
+  render "compiled_writings/#{{{filename}}}", "src/omar.yt/views/template.ecr"
 end
 
 highlighter = Syntax::Highlighter.new
@@ -45,7 +49,7 @@ get "/syntax/demo" do |env|
   grammar = highlighter.highlight(default_grammar, meta_grammar)
   input = highlighter.highlight(default_input, default_grammar)
 
-  templated "syntax.ecr"
+  rendered "syntax.ecr"
 end
 
 post "/syntax/update" do |env|
@@ -98,12 +102,42 @@ post "/syntax/update" do |env|
   {"input" => input, "grammar" => grammar}.to_json
 end
 
+head = <<-END_HEAD
+<head>
+<style>
+body {
+  margin: 40px auto;
+  max-width: 650px;
+  padding: 0 10px;
+  font-family: Open Sans,Arial;
+  color: #454545;
+  line-height: 1.2;
+}
+
+code {
+  background: #f8f8f8;
+}
+
+pre code {
+  overflow: auto;
+  tab-size: 4;
+  display: block;
+  padding: 0.5em;
+}
+</style>
+</head>
+END_HEAD
+
 get "/:path" do |env|
   path = env.params.url["path"]
   path = path.downcase
 
   if posts[path]?
-    posts[path]
+    head + <<-END_BODY
+    <body>
+      #{posts[path]}
+    </body>
+    END_BODY
   else
     env.redirect "/"
   end
