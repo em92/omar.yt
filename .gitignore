@@ -3,6 +3,10 @@
 /bin/
 /.shards/
 *.dwarf
+/work/
+/dev/
+sentry
+omar.yt
 
 # Libraries don't need dependency lock
 # Dependencies will be locked in application that uses them
