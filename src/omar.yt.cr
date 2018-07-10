@@ -94,32 +94,7 @@ end
 
 head = <<-END_HEAD
 <head>
-<style>
-body {
-  margin: 40px auto;
-  max-width: 650px;
-  padding: 0 10px;
-  font-family: Open Sans,Arial;
-  color: #454545;
-  line-height: 1.2;
-}
-
-code {
-  background: #f8f8f8;
-}
-
-a {
-  color: #0366d6;
-  text-decoration: none;
-}
-
-pre code {
-  overflow: auto;
-  tab-size: 4;
-  display: block;
-  padding: 0.5em;
-}
-</style>
+<link rel="stylesheet" href="/default.css">
 </head>
 END_HEAD
 
@@ -177,5 +152,6 @@ if Kemal.config.ssl
 end
 
 gzip true
+public_folder "assets"
 
 Kemal.run
