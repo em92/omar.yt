@@ -163,7 +163,7 @@ There are a significant number of languages that cannot be adequately described 
 
 HTML is similarly seldom found in a format that can be described strictly in BNF.
 
-The core library, [marpa](https://github.com/omarroth/marpa), does provide tools for handling these kinds of languages, however this functionality has not yet been implemented into the syntax highlighter.
+The core library, [marpa](https://github.com/omarroth/marpa), does provide tools for handling these kinds of languages, however this functionality is not yet supported in syntax.cr.
 
 ## Conclusion
 
