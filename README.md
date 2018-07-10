@@ -1,27 +1,15 @@
 # omar.yt
 
-TODO: Write a description here
-
-## Installation
-
-TODO: Write installation instructions here
-
-## Usage
-
-TODO: Write usage instructions here
-
-## Development
-
-TODO: Write development instructions here
+Files for [omar.yt](https://omar.yt).
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/omar.yt/fork>)
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+1.  Fork it (<https://github.com/omarroth/omar.yt/fork>)
+2.  Create your feature branch (`git checkout -b my-new-feature`)
+3.  Commit your changes (`git commit -am 'Add some feature'`)
+4.  Push to the branch (`git push origin my-new-feature`)
+5.  Create a new Pull Request
 
 ## Contributors
 
-- [your-github-user](https://github.com/your-github-user) Omar Roth - creator, maintainer
+- [omarroth](https://github.com/omarroth) Omar Roth - creator, maintainer
