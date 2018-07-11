@@ -65,7 +65,6 @@ number ~ /-?([\d]+)(\.\d+)?([eE][+-]?\d+)?/
 true ~ 'true'
 false ~ 'false'
 null ~ 'null'
-abc ~ 'abc'
 
 :discard ~ whitespace
 whitespace ~ [\s]+
@@ -78,7 +77,7 @@ To implement ambiguity (for example in a calculator), the `||` operator can be u
 ```ebnf
 Expression ::= Number
   | Expression '*' Expression
-  || Expression '*' Expression
+ || Expression '*' Expression
 ```
 
 The [documentation on metacpan.org](https://metacpan.org/pod/distribution/Marpa-R2/pod/Scanless/DSL.pod) provides more information.
@@ -126,7 +125,6 @@ number ~ /-?([\d]+)(\.\d+)?([eE][+-]?\d+)?/
 true ~ 'true'
 false ~ 'false'
 null ~ 'null'
-abc ~ 'abc'
 
 :discard ~ whitespace
 whitespace ~ [\s]+
