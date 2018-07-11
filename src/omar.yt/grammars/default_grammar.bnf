@@ -1,12 +1,12 @@
 # Grammar from https://metacpan.org/pod/distribution/Marpa-R2/pod/Semantics.pod
 :start ::= Expression
 Expression ::= Number
-| '(' Expression ')' bgcolor => salmon
-|| Expression '**' Expression bgcolor => red
-|| Expression '*' Expression bgcolor => yellow color => black
-| Expression '/' Expression bgcolor => green color => orange
-|| Expression '+' Expression bgcolor => blue color => orange
-| Expression '-' Expression bgcolor => cyan color => black
+  | '(' Expression ')' bgcolor => salmon
+ || Expression '**' Expression bgcolor => red
+ || Expression '*' Expression bgcolor => yellow color => black
+  | Expression '/' Expression bgcolor => green color => orange
+ || Expression '+' Expression bgcolor => blue color => orange
+  | Expression '-' Expression bgcolor => cyan color => black
 
 Number ~ [\d]+
 
