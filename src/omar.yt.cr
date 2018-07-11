@@ -8,6 +8,8 @@ macro rendered(filename)
   render "src/omar.yt/views/#{{{filename}}}"
 end
 
+Kemal::Config.new
+
 highlighter = Syntax::Highlighter.new
 
 default_grammar = File.read("./src/omar.yt/grammars/default_grammar.bnf")
