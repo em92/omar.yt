@@ -8,7 +8,7 @@ macro rendered(filename)
   render "src/omar.yt/views/#{{{filename}}}"
 end
 
-Kemal::Config.new
+Kemal::CLI.new
 
 highlighter = Syntax::Highlighter.new
 
