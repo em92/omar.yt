@@ -65,8 +65,8 @@ post "/syntax/update" do |env|
   grammar = grammar.gsub("</div>", "")
   grammar = XML.parse_html(grammar)
 
-  grammarSelectionBoundaries = grammar.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
-  inputSelectionBoundaries = input.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
+  input_selection_boundaries = input.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
+  grammar_selection_boundaries = grammar.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
 
   input = input.content
   grammar = grammar.content
@@ -81,13 +81,23 @@ post "/syntax/update" do |env|
   i = 0
   input = input.sub("\ufeff") do |replacement|
     i += 1
-    inputSelectionBoundaries[i - 1]
+
+    if input_selection_boundaries.size >= i
+      input_selection_boundaries[i - 1]
+    else
+      ""
+    end
   end
 
   i = 0
   grammar = grammar.sub("\ufeff") do |replacement|
     i += 1
-    grammarSelectionBoundaries[i - 1]
+
+    if grammar_selection_boundaries.size >= i
+      grammar_selection_boundaries[i - 1]
+    else
+      ""
+    end
   end
 
   env.response.content_type = "application/json"
