@@ -1,14 +1,41 @@
-require "./omar.yt/*"
+# "omar.yt" (which is a blog)
+# Copyright (C) 2018  Omar Roth
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+require "html"
+require "json"
 require "kemal"
 require "syntax"
 require "xml"
-require "html"
+require "./omar.yt/*"
+
+# Helpers
 
 macro rendered(filename)
-  render "src/omar.yt/views/#{{{filename}}}"
+  render "src/omar.yt/views/#{{{filename}}}.ecr"
 end
 
-Kemal::CLI.new
+macro templated(filename)
+  render "src/omar.yt/views/#{{{filename}}}.ecr", "src/omar.yt/views/template.ecr"
+end
+
+alias Post = NamedTuple(name: String, title: String, author: String, published: Time, content: String)
+
+DOMAIN = "https://omar.yt"
+AUTHOR = "Omar Roth"
+EMAIL  = "omarroth@hotmail.com"
 
 highlighter = Syntax::Highlighter.new
 
@@ -23,25 +50,115 @@ END_BNF
 default_input = "10 + (6 - 1 / 3) * 2"
 meta_grammar = highlighter.compile(meta_grammar + marker)
 
-posts = {} of String => {name: String, content: String}
-paths = Dir.children("./src/omar.yt/posts/").sort_by { |file| File.info("./src/omar.yt/posts/#{file}").modification_time }.reverse
-paths.each do |post|
-  name = post.rstrip(".md")
+# Setup
 
-  content = File.read("./src/omar.yt/posts/#{post}")
+Kemal::CLI.new
+
+posts = [] of Post
+Dir.children("./src/omar.yt/posts/").each do |path|
+  post = File.read("./src/omar.yt/posts/#{path}")
+  metadata, content = post.split("<<<<<<<")
+
+  title = path.rstrip(".md")
+  published = Time.now
+  author = AUTHOR
+
+  metadata.split("\n").select { |a| !a.empty? }.each do |tag|
+    key, value = tag.split(": ")
+
+    case key
+    when "author"
+      author = value
+    when "published"
+      published = Time.parse_rfc2822(value)
+    when "title"
+      title = value
+    else
+      puts "Unrecognized key #{key}"
+    end
+  end
+
+  title ||= path.rchop(".md")
+  published ||= Time.now
+
   content = String.build do |io|
     renderer = CustomRenderer.new(io, meta_grammar)
     Markdown.parse(content, renderer)
   end
 
-  posts[name.downcase.gsub(" ", "-")] = {name: name, content: content}
+  name = title.downcase.gsub(" ", "-")
+
+  posts << {name: name, title: title, author: author, published: published, content: content}
 end
+
+posts.sort_by! { |post| post[:published].epoch }
+posts.reverse!
+
+# Views
+
+get "/posts.json" do |env|
+  env.response.content_type = "application/json"
+  posts.to_pretty_json
+end
+
+get "/atom.xml" do |env|
+  env.response.content_type = "application/atom+xml"
+
+  XML.build(indent: "  ", encoding: "UTF-8") do |xml|
+    xml.element("feed", xmlns: "http://www.w3.org/2005/Atom", "xml:lang": "en-US") do
+      xml.element("link", rel: "self", href: "#{DOMAIN}/atom.xml")
+      xml.element("title") { xml.text AUTHOR }
+      xml.element("author") do
+        xml.element("name") { xml.text AUTHOR }
+        xml.element("email") { xml.text EMAIL }
+        xml.element("uri") { xml.text "#{DOMAIN}/" }
+      end
+      xml.element("id") { xml.text "#{DOMAIN}/" }
+
+      posts.each do |post|
+        xml.element("entry") do
+          xml.element("id") { xml.text "#{DOMAIN}/#{post[:name]}" }
+          xml.element("title") { xml.text post[:title] }
+          xml.element("updated") { xml.text post[:published].to_s }
+          xml.element("published") { xml.text post[:published].to_s }
+          xml.element("author") do
+            xml.element("name") { xml.text AUTHOR }
+            xml.element("email") { xml.text EMAIL }
+            xml.element("uri") { xml.text "#{DOMAIN}/" }
+          end
+
+          xml.element("content", type: "html") { xml.text post[:content] }
+        end
+      end
+    end
+  end
+end
+
+get "/" do |env|
+  templated "index"
+end
+
+get "/:name" do |env|
+  name = env.params.url["name"]
+
+  if post = posts.select { |post| post[:name] == name }[0]?
+    templated "post"
+  else
+    env.redirect "/"
+  end
+end
+
+get "/favicon.ico" do |env|
+  halt env, status_code: 404
+end
+
+# Syntax demo
 
 get "/syntax/demo" do |env|
   grammar = highlighter.highlight(default_grammar, meta_grammar)
   input = highlighter.highlight(default_input, default_grammar)
 
-  rendered "syntax.ecr"
+  rendered "syntax"
 end
 
 post "/syntax/update" do |env|
@@ -104,42 +221,7 @@ post "/syntax/update" do |env|
   {"input" => input, "grammar" => grammar}.to_json
 end
 
-head = <<-END_HEAD
-<head>
-<link rel="stylesheet" href="/default.css">
-</head>
-END_HEAD
-
-get "/" do |env|
-  content = head
-  content += "<body>"
-  posts.each do |key, value|
-    content += %(<h1><a href="#{key}">#{value[:name]}</a></h1>)
-    content += value[:content]
-    if key != posts.last_key?
-      content += %(<hr style="margin-left:1em; margin-right:1em;">)
-    end
-  end
-  content += "</body>"
-  content
-end
-
-get "/:path" do |env|
-  path = env.params.url["path"]
-  name = path.downcase.gsub(" ", "-")
-
-  if posts[name]?
-    post = posts[name]
-
-    head + <<-END_BODY
-    <body>
-      <h1>#{post[:name]}</h1>
-      #{post[:content]}
-    </body>
-    END_BODY
-  else
-    env.redirect "/"
-  end
+error 404 do |env|
 end
 
 # Add redirect if SSL is enabled

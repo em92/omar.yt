@@ -1,4 +1,5 @@
 require "markdown"
+require "openssl"
 
 class CustomRenderer < Markdown::HTMLRenderer
   def initialize(@io : IO, @grammar : Syntax::Grammar | String)
@@ -68,4 +69,10 @@ class CustomRenderer < Markdown::HTMLRenderer
 
     super(text)
   end
+end
+
+def sha256(text)
+  digest = OpenSSL::Digest.new("SHA256")
+  digest << text
+  return digest.hexdigest
 end

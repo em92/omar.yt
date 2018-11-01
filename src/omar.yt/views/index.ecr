@@ -1,0 +1,13 @@
+<% posts.each do |post| %>
+    <div class="post">
+        <h1 class="title"><a href="<%= post[:name] %>"><%= post[:title] %></a></h1>
+        <h4 class="published">Published <%= post[:published].to_s("%B %-d, %Y") %></h4>
+        <div class="content">
+            <%= post[:content] %>
+        </div>
+    </div>
+
+    <% if posts.index(post) != posts.size - 1 %>
+    <hr>
+    <% end %>
+<% end %>

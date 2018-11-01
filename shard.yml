@@ -15,7 +15,10 @@ dependencies:
   kemal:
     github: kemalcr/kemal
     branch: master
+  marpa:
+    github: omarroth/marpa
+    branch: master
 
-crystal: 0.25.1
+crystal: 0.26.1
 
-license: MIT
+license: AGPLv3

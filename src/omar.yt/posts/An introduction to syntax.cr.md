@@ -1,3 +1,8 @@
+title: An introduction to syntax.cr
+published: Mon, 9 Jul 2018 23:04:15 -0500
+author: Omar Roth
+<<<<<<<
+
 ## Introduction
 
 The [.tmLanguage format](https://manual.macromates.com/en/language_grammars) is currently the most popular tool for adding syntax highlighting to popular editors. It is supported by Github, VSCode, Atom, Vim, TextMate (after which it is named), and many others.
