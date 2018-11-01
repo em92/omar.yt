@@ -59,9 +59,10 @@ Dir.children("./src/omar.yt/posts/").each do |path|
   post = File.read("./src/omar.yt/posts/#{path}")
   metadata, content = post.split("<<<<<<<")
 
-  title = path.rstrip(".md")
-  published = Time.now
-  author = AUTHOR
+  author = nil
+  published = nil
+  title = nil
+  updated = nil
 
   metadata.split("\n").select { |a| !a.empty? }.each do |tag|
     key, value = tag.split(": ")
@@ -73,13 +74,17 @@ Dir.children("./src/omar.yt/posts/").each do |path|
       published = Time.parse_rfc2822(value)
     when "title"
       title = value
+    when "updated"
+      updated = Time.parse_rfc2822(value)
     else
       puts "Unrecognized key #{key}"
     end
   end
 
-  title ||= path.rchop(".md")
+  author ||= AUTHOR
   published ||= Time.now
+  title ||= path.rchop(".md")
+  updated ||= published
 
   content = String.build do |io|
     renderer = CustomRenderer.new(io, meta_grammar)
@@ -88,7 +93,7 @@ Dir.children("./src/omar.yt/posts/").each do |path|
 
   name = title.downcase.gsub(" ", "-")
 
-  posts << {name: name, title: title, author: author, published: published, content: content}
+  posts << {name: name, title: title, author: author, published: published, updated: updated, content: content}
 end
 
 posts.sort_by! { |post| post[:published].epoch }
@@ -119,7 +124,7 @@ get "/atom.xml" do |env|
         xml.element("entry") do
           xml.element("id") { xml.text "#{DOMAIN}/#{post[:name]}" }
           xml.element("title") { xml.text post[:title] }
-          xml.element("updated") { xml.text post[:published].to_s }
+          xml.element("updated") { xml.text post[:updated].to_s }
           xml.element("published") { xml.text post[:published].to_s }
           xml.element("author") do
             xml.element("name") { xml.text AUTHOR }
