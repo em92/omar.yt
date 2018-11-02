@@ -31,7 +31,7 @@ macro templated(filename)
   render "src/omar.yt/views/#{{{filename}}}.ecr", "src/omar.yt/views/template.ecr"
 end
 
-alias Post = NamedTuple(name: String, title: String, author: String, published: Time, content: String)
+alias Post = NamedTuple(name: String, title: String, author: String, published: Time, updated: Time, content: String)
 
 DOMAIN = "https://omar.yt"
 AUTHOR = "Omar Roth"
