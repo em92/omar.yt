@@ -53,8 +53,6 @@ meta_grammar = highlighter.compile(meta_grammar + marker)
 
 # Setup
 
-# Kemal::CLI.new
-
 posts = [] of Post
 Dir.children("./src/omar.yt/posts/").each do |path|
   post = File.read("./src/omar.yt/posts/#{path}")
