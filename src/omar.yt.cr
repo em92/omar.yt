@@ -117,7 +117,7 @@ get "/instagram/rss/:username" do |env|
   XML.build(indent: "  ", encoding: "UTF-8") do |xml|
     xml.element("feed", xmlns: "http://www.w3.org/2005/Atom", "xml:lang": "en-US") do
       xml.element("link", rel: "self", href: "#{DOMAIN}/instagram/rss/#{username}")
-      xml.element("title") { xml.text "Instagram Feed for #{full_name}" }
+      xml.element("title") { xml.text "Instagram Feed for #{full_name} (@#{username})" }
       xml.element("author") do
         xml.element("name") { xml.text full_name }
         xml.element("uri") { xml.text "https://www.instagram.com/#{username}/" }
