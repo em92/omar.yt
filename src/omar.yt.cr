@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 require "html"
+require "instagram"
 require "json"
 require "kemal"
 require "syntax"
@@ -52,7 +53,7 @@ meta_grammar = highlighter.compile(meta_grammar + marker)
 
 # Setup
 
-Kemal::CLI.new
+# Kemal::CLI.new
 
 posts = [] of Post
 Dir.children("./src/omar.yt/posts/").each do |path|
@@ -96,7 +97,7 @@ Dir.children("./src/omar.yt/posts/").each do |path|
   posts << {name: name, title: title, author: author, published: published, updated: updated, content: content}
 end
 
-posts.sort_by! { |post| post[:published].epoch }
+posts.sort_by! { |post| post[:published].to_unix }
 posts.reverse!
 
 # Views
@@ -104,6 +105,60 @@ posts.reverse!
 get "/posts.json" do |env|
   env.response.content_type = "application/json"
   posts.to_pretty_json
+end
+
+get "/instagram/rss/:username" do |env|
+  env.response.content_type = "application/atom+xml"
+
+  username = env.params.url["username"]
+
+  user_info = Instagram.get_user_page(username)
+  user_id = user_info["id"].as_s
+  full_name = user_info["full_name"].as_s
+
+  XML.build(indent: "  ", encoding: "UTF-8") do |xml|
+    xml.element("feed", xmlns: "http://www.w3.org/2005/Atom", "xml:lang": "en-US") do
+      xml.element("link", rel: "self", href: "#{DOMAIN}/instagram/rss/#{username}")
+      xml.element("title") { xml.text "Instagram Feed for #{full_name}" }
+      xml.element("author") do
+        xml.element("name") { xml.text full_name }
+        xml.element("uri") { xml.text "https://www.instagram.com/#{username}/" }
+      end
+      xml.element("id") { xml.text user_id }
+
+      nodes = user_info["edge_owner_to_timeline_media"]["edges"].as_a
+      nodes.each do |node|
+        node = node["node"]
+
+        id = node["id"].as_s
+
+        title = node["edge_media_to_caption"]["edges"][0]?.try &.["node"]["text"].as_s
+        title ||= ""
+
+        published = node["taken_at_timestamp"].as_i
+        published = Time.unix(published).to_s
+
+        image_url = node["display_url"].as_s
+
+        content = <<-END_HTML
+        <h3>#{title}</h3>
+        <img src="#{image_url}"/>
+        END_HTML
+
+        xml.element("entry") do
+          xml.element("id") { xml.text id }
+          xml.element("title") { xml.text title }
+          xml.element("published") { xml.text published }
+          xml.element("author") do
+            xml.element("name") { xml.text full_name }
+            xml.element("uri") { xml.text "https://www.instagram.com/#{username}/" }
+          end
+
+          xml.element("content", type: "html") { xml.text content }
+        end
+      end
+    end
+  end
 end
 
 get "/atom.xml" do |env|

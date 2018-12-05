@@ -18,7 +18,10 @@ dependencies:
   marpa:
     github: omarroth/marpa
     branch: master
+  instagram:
+    github: omarroth/instagram.cr
+    branch: master
 
-crystal: 0.26.1
+crystal: 0.27.0
 
 license: AGPLv3
