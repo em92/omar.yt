@@ -106,11 +106,10 @@ get "/posts.json" do |env|
 end
 
 get "/instagram/rss/:username" do |env|
-  env.response.content_type = "application/atom+xml"
-
   username = env.params.url["username"]
-
   user_info = Instagram.get_user_page(username)
+
+  env.response.content_type = "application/atom+xml"
   user_id = user_info["id"].as_s
   full_name = user_info["full_name"].as_s
 
