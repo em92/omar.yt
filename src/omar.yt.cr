@@ -20,6 +20,7 @@ require "json"
 require "kemal"
 require "syntax"
 require "xml"
+require "./omar.yt/helpers/*"
 require "./omar.yt/*"
 
 # Helpers
@@ -276,6 +277,55 @@ post "/syntax/update" do |env|
 
   env.response.content_type = "application/json"
   {"input" => input, "grammar" => grammar}.to_json
+end
+
+get "/shapes/demo" do |env|
+  rendered "shapes"
+end
+
+post "/shapes/update" do |env|
+  body = env.request.body.try &.gets_to_end
+
+  if !body
+    next ""
+  end
+
+  json = JSON.parse(body)
+  input = json["input"]
+
+  input = input.as_s
+  input = input.gsub("<div>", "\n")
+  input = input.gsub("</div>", "")
+  input = XML.parse_html(input)
+
+  input_selection_boundaries = input.xpath_nodes(%q(//span[@class="rangySelectionBoundary"]))
+  input = input.content
+
+  begin
+    parser = Marpa::Parser.new
+    generated_js = parser.parse(input, Shapes::ShapeGrammar, Shapes::ShapeActions.new).as(Array).flatten.join("")
+    if !generated_js.empty?
+      generated_js += Shapes::JSBoilerplate
+      generated_js = generated_js.gsub("\n", " ")
+      generated_js = generated_js.gsub(/ +/, " ")
+    end
+  rescue ex
+    generated_js = ""
+  end
+
+  i = 0
+  input = input.sub("\ufeff") do |replacement|
+    i += 1
+
+    if input_selection_boundaries.size >= i
+      input_selection_boundaries[i - 1]
+    else
+      ""
+    end
+  end
+
+  env.response.content_type = "application/json"
+  {"generated_js" => generated_js}.to_json
 end
 
 error 404 do |env|
