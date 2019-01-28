@@ -52,18 +52,25 @@ module Shapes
         y ||= "0.0"
         z ||= "0.0"
 
-        inner_loop = <<-END_LOOP
-      var start_point = #{range[1].as(Array).flatten.join("")};
-      var end_point = #{range[5].as(Array).flatten.join("")};
-      var delta = #{delta[2]};
+        inner_loop = <<-END_CODE
+        var start_point = #{range[1].as(Array).flatten.join("")};
+        var end_point = #{range[5].as(Array).flatten.join("")};
+        var delta = #{delta[2]};
+        
+        var points = [];
+        
+        for (t = start_point; t + delta <= end_point; t += delta) {
+            points.push({x: #{x}, y: #{y}, z: #{z}});
+        }
       
-      var points = [];
-      
-      for (t = start_point; t + delta <= end_point; t += delta) {
+        END_CODE
+
+        if range[4] == ["<="]
+          inner_loop += <<-END_CODE
+          t = end_point;
           points.push({x: #{x}, y: #{y}, z: #{z}});
-      }
-      
-      END_LOOP
+          END_CODE
+        end
 
         @first_loop = false
       else
@@ -71,20 +78,29 @@ module Shapes
         y ||= "points[i].y"
         z ||= "points[i].z"
 
-        inner_loop = <<-END_LOOP
-      var start_point = #{range[1].as(Array).flatten.join("")};
-      var end_point = #{range[5].as(Array).flatten.join("")};
-      var delta = #{delta[2]};
-      
-      var new_points = [];
-      
-      for (i = 0; i < points.length; i++) {
-          for (t = start_point; t + delta <= end_point; t += delta) {
-              new_points.push({x: #{x}, y: #{y}, z: #{z}});
-          }
-      }
-      
-      END_LOOP
+        inner_loop = <<-END_CODE
+        var start_point = #{range[1].as(Array).flatten.join("")};
+        var end_point = #{range[5].as(Array).flatten.join("")};
+        var delta = #{delta[2]};
+        
+        var new_points = [];
+        
+        for (i = 0; i < points.length; i++) {
+            for (t = start_point; t + delta <= end_point; t += delta) {
+                new_points.push({x: #{x}, y: #{y}, z: #{z}});
+            }
+        END_CODE
+
+        if range[4] == ["<="]
+          inner_loop += <<-END_CODE
+          t = end_point;
+          new_points.push({x: #{x}, y: #{y}, z: #{z}});
+          END_CODE
+        end
+
+        inner_loop += <<-END_CODE
+        }
+        END_CODE
       end
 
       inner_loop
