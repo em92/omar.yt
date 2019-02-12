@@ -55,11 +55,11 @@ module Shapes
         inner_loop = <<-END_CODE
         var start_point = #{range[1].as(Array).flatten.join("")};
         var end_point = #{range[5].as(Array).flatten.join("")};
-        var delta = #{delta[2]};
-        
+        var d = #{delta[2]};
+
         var points = [];
-        
-        for (t = start_point; t + delta <= end_point; t += delta) {
+
+        for (t = start_point; t + d <= end_point; t += d) {
             points.push({x: #{x}, y: #{y}, z: #{z}});
         }
       
@@ -81,12 +81,12 @@ module Shapes
         inner_loop = <<-END_CODE
         var start_point = #{range[1].as(Array).flatten.join("")};
         var end_point = #{range[5].as(Array).flatten.join("")};
-        var delta = #{delta[2]};
-        
+        var d = #{delta[2]};
+
         var new_points = [];
-        
+
         for (i = 0; i < points.length; i++) {
-            for (t = start_point; t + delta <= end_point; t += delta) {
+            for (t = start_point; t + d <= end_point; t += d) {
                 new_points.push({x: #{x}, y: #{y}, z: #{z}});
             }
         END_CODE
@@ -121,12 +121,6 @@ module Shapes
         "Math.E"
       when "pi"
         "Math.PI"
-      when "x"
-        "points[i].x"
-      when "y"
-        "points[i].y"
-      when "z"
-        "points[i].z"
       else
         variable
       end
@@ -136,13 +130,31 @@ module Shapes
       variable = context[0]
       parameters = context[1].as(Array).flatten.join("")
       body = context[3]
+      if body.as?(Array)
+        body = body.as(Array).flatten.join("")
+      end
 
-      "function #{variable}#{parameters} {\nreturn #{body}\n}\n"
+      "function #{variable}#{parameters} {\nreturn #{body}\n};\n"
     end
 
     def function_call(context)
       function_name = context[0]
-      body = context[2].as(Array).flatten.join("")
+      body = context[2].as(Array).flatten
+
+      body = body.map do |item|
+        case item
+        when "x"
+          "points[i].x"
+        when "y"
+          "points[i].y"
+        when "z"
+          "points[i].z"
+        else
+          item
+        end
+      end
+
+      body = body.join("")
 
       case function_name
       when "sin"
@@ -193,7 +205,7 @@ module Shapes
 
   parameters ::= '(' variable_seq ')'
 
-  variable_seq ::= variable separator => ',' proper => 0
+  variable_seq ::= word+ separator => ',' proper => 0
   variable ::= word action => variable_call
   word ~ [a-zA-Z]+
 

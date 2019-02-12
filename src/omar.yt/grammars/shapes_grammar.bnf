@@ -1,26 +1,29 @@
 :start ::= statements
 statements ::= statement+
 statement ::= function
-| expression color => purple
-| plane tuple range color => red
-| plane tuple range delta color => red
+| expression
+| plane tuple range
+| plane tuple range delta
 
 tuple ::= '{' expression_seq '}'
-plane ::= ':' variable color => black
-delta ::= 'd' '=' number color => black
+plane ::= ':' variable
+delta ::= 'd' '=' number
 expression_seq ::= expression* separator => ','
 
-function ::= variable '=' expression color => green
-| variable parameters '=' expression color => blue
+function ::= variable '=' expression
+| variable parameters '=' expression
 
 parameters ::= '(' variable_seq ')'
 
-variable_seq ::= variable separator => ',' proper => 0
-variable ~ [\w]+
-range ::= '{' expression op variable op expression '}' color => darkred
+variable_seq ::= word+ separator => ',' proper => 0
+variable ::= word
+word ~ [a-zA-Z]+
+
+range ::= '{' expression op variable op expression '}'
 op ::= '<=' | '<' | '='
 
 expression ::= number
+| '(' expression ')'
 || expression '^' expression
 || expression '*' expression
 | expression '/' expression
