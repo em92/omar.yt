@@ -25,8 +25,30 @@
 
 <body>
 <div class="pure-g">
-    <div class="pure-u-1 pure-u-md-8-24">
+    <div style="position:relative" class="pure-u-1 pure-u-md-8-24">
         <pre oninput="update();" spellcheck="false" contenteditable="true" id="input"># You can comment like this<div>a(t) = max(|cos(t)|, |sin(t)|)</div><div><br></div></pre>
+        <script>
+        function download_point_cloud() {
+            console.log(new_points);
+            var object = new_points.map(function(a) {return a.x + " " + a.y + " " + a.z}).join("\n")
+            var data = new Blob([object], {type: 'text/plain'});
+            var textFile = window.URL.createObjectURL(data);
+            var link = document.createElement('a');
+            link.href = textFile;
+            link.setAttribute('download', 'point_cloud.xyz');
+            document.body.appendChild(link);
+
+            window.requestAnimationFrame(function() {
+                var event = new MouseEvent('click');
+                link.dispatchEvent(event);
+                document.body.removeChild(link);
+            });
+         }
+        </script>
+        <button style="width:100%;position:absolute;bottom:0" type="button" onclick="download_point_cloud()"
+            class="pure-button pure-button-primary">
+            <b>Download point cloud (.xyz)</b>
+        </button>
     </div>
     <div class="pure-u-1 pure-u-md-16-24">
         <canvas id="canvas">

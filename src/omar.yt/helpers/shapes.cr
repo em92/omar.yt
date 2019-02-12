@@ -5,8 +5,10 @@ module Shapes
     @first_loop = true
 
     def abs(context)
-      body = context.as(Array).flatten.join("").strip("|")
-      "Math.abs(#{body})"
+      context[0] = "("
+      context[2] = ")"
+      context.insert(0, "Math.abs")
+      context
     end
 
     def pow(context)
@@ -20,6 +22,24 @@ module Shapes
       tuple.delete(",")
       range = context[2]
 
+      tuple = tuple.map do |item|
+        item = item.as(Array).flatten
+        item.map! do |segment|
+          case segment
+          when "x"
+            "points[i].x"
+          when "y"
+            "points[i].y"
+          when "z"
+            "points[i].z"
+          else
+            segment
+          end
+        end
+
+        item
+      end
+      
       delta = context[3]?
       delta ||= ["d", "=", "0.1"]
 
@@ -36,15 +56,15 @@ module Shapes
       z = tuple[plane.index("z") || 10]?
 
       if x.is_a?(Array)
-        x = x.as(Array).flatten.join("")
+        x = x.join("")
       end
 
       if y.is_a?(Array)
-        y = y.as(Array).flatten.join("")
+        y = y.join("")
       end
 
       if z.is_a?(Array)
-        z = z.as(Array).flatten.join("")
+        z = z.join("")
       end
 
       if @first_loop
@@ -108,9 +128,9 @@ module Shapes
 
     def variable_definition(context)
       variable = context[0]
-      body = context[2]
+      body = context[2].as(Array).flatten.join("")
 
-      "#{variable} = #{body}\n"
+      "#{variable} = #{body};\n"
     end
 
     def variable_call(context)
@@ -158,32 +178,33 @@ module Shapes
 
       case function_name
       when "sin"
-        "Math.sin(#{body})"
+        function_name = "Math.sin"
       when "asin", "arcsin"
-        "Math.asin(#{body})"
+        function_name = "Math.asin"
       when "csc"
-        "(1/Math.sin(#{body})"
+        function_name = "1/Math.sin"
       when "cos"
-        "Math.cos(#{body})"
+        function_name = "Math.cos"
       when "acos", "arccos"
-        "Math.acos(#{body})"
+        function_name = "Math.acos"
       when "sec"
-        "(1/Math.cos(#{body})"
+        function_name = "1/Math.cos"
       when "tan"
-        "Math.tan(#{body})"
+        function_name = "Math.tan"
       when "atan"
-        "Math.atan(#{body})"
+        function_name = "Math.atan"
       when "cot"
-        "(1/Math.tan(#{body})"
+        function_name = "1/Math.tan"
       when "max"
-        "Math.max(#{body})"
+        function_name = "Math.max"
       when "min"
-        "Math.min(#{body})"
+        function_name = "Math.min"
       when "sqrt"
-        "Math.sqrt(#{body})"
-      else
-        "#{function_name}(#{body})"
+        function_name = "Math.sqrt"
       end
+
+      context[0] = function_name
+      context
     end
   end
 
